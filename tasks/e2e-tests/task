@@ -10,7 +10,6 @@ az cloud set --name ${AZURE_ENVIRONMENT}
 az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}
 az account set -s ${AZURE_SUBSCRIPTION_ID}
 
-source e2e/functions/utils.sh
 source director-state/director.env
 
 : ${SCENARIO:?}
