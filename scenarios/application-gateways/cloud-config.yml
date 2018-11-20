@@ -19,4 +19,4 @@
   value:
     name: application-gateways
     cloud_properties:
-      application_security_groups: ["default-agw"]
+      application_gateway: ["default-agw"]
