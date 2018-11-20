@@ -126,6 +126,10 @@ shared:
       - <<: *run-e2e
         params:
           <<: *azure-environment-params
+          SCENARIO: application-gateways
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
           SCENARIO: ip-forwarding
       - <<: *run-e2e
         params:

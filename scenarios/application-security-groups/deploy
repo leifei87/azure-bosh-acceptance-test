@@ -18,8 +18,10 @@ asg_name=${asg_resource_id[-1]}
 
 bosh -n -d $scenario delete-deployment
 
-if [ "${asg_name}" != "default-asg" ]
+if [ "${asg_name}" == "default-asg" ]
 then
-  echo "The application security group is not assigned to the nic"
+  echo "The application security group is assigned to the specific nic successfully"
+else
+  echo "The application security group is not assigned to the specific nic"
   exit 1
 fi

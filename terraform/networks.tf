@@ -13,11 +13,18 @@ resource "azurerm_subnet" "director" {
   address_prefix       = "${cidrsubnet(azurerm_virtual_network.e2e_virtual_network.address_space[0], 8, 0)}"
 }
 
+resource "azurerm_subnet" "appgateway_subnet" {
+  name                 = "app-gateway"
+  resource_group_name  = "${azurerm_resource_group.bosh_resource_group.name}"
+  virtual_network_name = "${azurerm_virtual_network.e2e_virtual_network.name}"
+  address_prefix       = "${cidrsubnet(azurerm_virtual_network.e2e_virtual_network.address_space[0], 8, 220)}"
+}
+
 resource "azurerm_subnet" "e2e_subnets" {
   name                 = "subnet-${count.index + 1}"
   resource_group_name  = "${azurerm_resource_group.bosh_resource_group.name}"
   virtual_network_name = "${azurerm_virtual_network.e2e_virtual_network.name}"
   address_prefix       = "${cidrsubnet(azurerm_virtual_network.e2e_virtual_network.address_space[0], 8, count.index + 1)}"
 
-  count = 20
+  count = 21
 }
