@@ -7,4 +7,14 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario
 
+rg_name=$(get_rg_name ${scenario})
+vm_count=$(az vm availability-set show --resource-group ${rg_name} --name e2e-availability-sets | jq -r '.virtualMachines | length')
+
 bosh -n -d $scenario delete-deployment
+
+if [ ${vm_count} == 3 ]
+then
+  echo "All instances have been assigned to the specific availability set successfully"
+else
+  exit 1
+fi
