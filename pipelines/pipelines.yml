@@ -139,6 +139,14 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: dynamic-public-ip
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: ephemeral-disk
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: disable-ephemeral-disk
 
   - &teardown
     task: teardown
