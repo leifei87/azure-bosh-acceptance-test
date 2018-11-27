@@ -48,7 +48,7 @@ function get_vm_name_by_instance_group ()
 {
   deployment_name=$1
   instance_group_name=$2
-  IFS=';' read -r -a vm_cid <<< $(bosh -d ${deployment_name} vms --json |jq -r --arg instance ${instance_group_name} '.Tables[0].Rows[] | select(.instance | contains($instance})).vm_cid')
+  IFS=';' read -r -a vm_cid <<< $(bosh -d ${deployment_name} vms --json |jq -r --arg instance ${instance_group_name} '.Tables[0].Rows[] | select(.instance | contains($instance)).vm_cid')
 
   for element in "${vm_cid[@]}"
   do
