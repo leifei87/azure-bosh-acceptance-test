@@ -44,6 +44,23 @@ function get_vm_name ()
   echo $vm_name
 }
 
+function get_storage_account_name ()
+{
+  deployment_name=$1
+  IFS=';' read -r -a vm_cid <<< $(bosh -d ${deployment_name} vms --json | jq -r '.Tables[0].Rows[0].vm_cid')
+
+  for element in "${vm_cid[@]}"
+  do
+    IFS=':' read -r -a pairs <<< "$element"
+    case ${pairs[0]} in
+      storage_account_name)
+        storage_account_name=${pairs[1]}
+        ;;
+    esac
+  done
+  echo $storage_account_name
+}
+
 function get_vm_name_by_instance_group ()
 {
   deployment_name=$1

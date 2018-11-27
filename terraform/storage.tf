@@ -33,7 +33,7 @@ resource "azurerm_storage_account" "bosh_vms_storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
-  count = 2
+  count = 3
 }
 
 resource "azurerm_storage_container" "bosh_vms_storage_container" {
@@ -43,7 +43,7 @@ resource "azurerm_storage_container" "bosh_vms_storage_container" {
   storage_account_name  = "${element(azurerm_storage_account.bosh_vms_storage_account.*.name, count.index)}"
   container_access_type = "private"
 
-  count = 2
+  count = 3
 }
 
 resource "azurerm_storage_container" "bosh_vms_stemcell_storage_container" {
@@ -53,5 +53,18 @@ resource "azurerm_storage_container" "bosh_vms_stemcell_storage_container" {
   storage_account_name  = "${element(azurerm_storage_account.bosh_vms_storage_account.*.name, count.index)}"
   container_access_type = "private"
 
-  count = 2
+  count = 3
+}
+
+resource "azurerm_storage_blob" "bosh_container_blobs" {
+  name = "testblob-${count.index}.vhd"
+
+  resource_group_name    = "${azurerm_resource_group.bosh_resource_group.name}"
+  storage_account_name   = "${replace(var.env_name, "-", "")}${data.template_file.base_storage_account_wildcard.rendered}0"
+  storage_container_name = "${element(azurerm_storage_container.bosh_vms_storage_container.*.name, 0)}"
+
+  type = "page"
+  size = 5120
+
+  count = 6
 }

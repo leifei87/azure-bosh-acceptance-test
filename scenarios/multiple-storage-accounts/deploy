@@ -1,5 +1,6 @@
 #!/bin/bash -xeu
 
+source e2e/functions/utils.sh
 scenario=$1
 scenario_path=$2
 
@@ -7,4 +8,13 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario
 
+storage_account=$(get_storage_account_name ${scenario})
+
 bosh -n -d $scenario delete-deployment
+
+if [[ "${storage_account}" =~ "boshvms" ]] && [[ "${storage_account}" != *"boshvms0" ]]
+then
+  echo "The selected storage account is available as expected"
+else
+  exit 1
+fi
