@@ -212,6 +212,10 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: regional-load-balancer
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: resource-groups
           - <<: *run-e2e-common-cases
         ensure:
           do:
@@ -255,6 +259,10 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: regional-load-balancer
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: resource-groups
           - <<: *run-e2e-common-cases
         ensure:
           do:
