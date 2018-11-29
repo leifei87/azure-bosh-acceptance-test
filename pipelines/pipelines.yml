@@ -147,6 +147,10 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: disable-ephemeral-disk
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: root-disk
 
   - &teardown
     task: teardown

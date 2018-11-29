@@ -1,0 +1,75 @@
+#!/bin/bash -xeu
+
+source e2e/functions/utils.sh
+scenario=$1
+scenario_path=$2
+
+##########################################
+####   Case: size 50GB, caching None   ####
+##########################################
+echo "Case: size 50GB, caching None"
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -o ${scenario_path}/ops.yml \
+  -v scenario=$scenario \
+  -v disk_type=root-disk-none
+
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.osDisk.caching')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.osDisk.diskSizeGb')
+
+if [ ${disk_size} == 50 ] && [ "${disk_caching}" == "None" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi
+
+##########################################
+###  Case: size 50GB, caching ReadOnly ###
+##########################################
+echo "Case: size 50GB, caching ReadOnly"
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -o ${scenario_path}/ops.yml \
+  -v scenario=$scenario \
+  -v disk_type=root-disk-readonly
+
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.osDisk.caching')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.osDisk.diskSizeGb')
+
+if [ ${disk_size} == 50 ] && [ "${disk_caching}" == "ReadOnly" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi
+
+
+##########################################
+### Case: size 1TB, caching ReadWrite  ###
+##########################################
+echo "Case: size 1TB, caching ReadWrite"
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -o ${scenario_path}/ops.yml \
+  -v scenario=$scenario \
+  -v disk_type=root-disk-readwrite
+
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.osDisk.caching')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.osDisk.diskSizeGb')
+
+bosh -n -d $scenario delete-deployment
+
+if [ ${disk_size} == 1024 ] && [ "${disk_caching}" == "ReadWrite" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi
