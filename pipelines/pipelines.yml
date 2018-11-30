@@ -151,6 +151,10 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: root-disk
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: tags
 
   - &teardown
     task: teardown

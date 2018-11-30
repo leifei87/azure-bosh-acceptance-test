@@ -30,10 +30,11 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario \
   -v sku=$sku
 
-bosh -n -d $scenario delete-deployment
 
 vm_name=$(get_vm_name ${scenario})
 backend_ipconf_id=$(az network lb list --resource-group ${rg_name} | jq -r '.[] | select(.name | contains("standard-lb")).backendAddressPools[0].backendIpConfigurations[0].id')
+
+bosh -n -d $scenario delete-deployment
 
 if [[ "${backend_ipconf_id}" =~ "${vm_name}" ]]
 then
