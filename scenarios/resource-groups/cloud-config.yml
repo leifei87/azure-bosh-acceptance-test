@@ -19,5 +19,5 @@
   value:
     name: separate-resource-group
     cloud_properties:
-      assign_dynamic_public_ip: True,
+      assign_dynamic_public_ip: true
       resource_group_name: ((resource_group_name))-temp
