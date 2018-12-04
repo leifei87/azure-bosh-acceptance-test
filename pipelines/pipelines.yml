@@ -155,6 +155,9 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: tags
+        params:
+          <<: *azure-environment-params
+          SCENARIO: separate-public-ip
 
   - &teardown
     task: teardown
