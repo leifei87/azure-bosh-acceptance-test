@@ -6,6 +6,10 @@ output "resource_group_name" {
   value = "${azurerm_resource_group.bosh_resource_group.name}"
 }
 
+output "public_ip_resource_group_name" {
+  value = "${azurerm_resource_group.public_ip_resource_group.name}"
+}
+
 output "vnet_name" {
   value = "${azurerm_virtual_network.e2e_virtual_network.name}"
 }
@@ -28,6 +32,10 @@ output "internal_ip" {
 
 output "external_ip" {
   value = "${azurerm_public_ip.director.ip_address}"
+}
+
+output "separate_public_ip" {
+  value = "${azurerm_public_ip.separate.ip_address}"
 }
 
 output "default_security_group" {

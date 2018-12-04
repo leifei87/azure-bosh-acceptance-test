@@ -1,0 +1,27 @@
+#!/bin/bash -xeu
+
+source e2e/functions/utils.sh
+scenario=$1
+scenario_path=$2
+
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -o ${scenario_path}/ops.yml \
+  -v scenario=${scenario} \
+  -l <( cat environment/metadata )
+
+public_ip_rg_name=$(cat environment/metadata | jq -r '.public_ip_resource_group_name')
+
+vm_name=$(get_vm_name ${scenario})
+nic_name="${vm_name}-0"
+ip_configuration=$(az network public-ip list --resource-group ${public_ip_rg_name} | jq -r '.[].ipConfiguration.id')
+
+bosh -n -d $scenario delete-deployment
+az group delete --name ${public_ip_rg_name} -y
+
+if [[ "${ip_configuration}" =~ "${nic_name}" ]]
+then
+  echo "The public ip is configured as expected"
+else
+  echo "The public ip is not configured correctly"
+  exit 1
+fi
