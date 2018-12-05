@@ -16,7 +16,6 @@ nic_name="${vm_name}-0"
 ip_configuration=$(az network public-ip list --resource-group ${public_ip_rg_name} | jq -r '.[].ipConfiguration.id')
 
 bosh -n -d $scenario delete-deployment
-az group delete --name ${public_ip_rg_name} -y
 
 if [[ "${ip_configuration}" =~ "${nic_name}" ]]
 then

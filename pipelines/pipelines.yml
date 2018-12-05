@@ -155,6 +155,7 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: tags
+      - <<: *run-e2e
         params:
           <<: *azure-environment-params
           SCENARIO: separate-public-ip
