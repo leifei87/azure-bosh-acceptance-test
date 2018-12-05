@@ -159,6 +159,10 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: separate-public-ip
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: multiple-nics
 
   - &teardown
     task: teardown

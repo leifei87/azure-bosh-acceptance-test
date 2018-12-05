@@ -26,5 +26,5 @@ resource "azurerm_subnet" "e2e_subnets" {
   virtual_network_name = "${azurerm_virtual_network.e2e_virtual_network.name}"
   address_prefix       = "${cidrsubnet(azurerm_virtual_network.e2e_virtual_network.address_space[0], 8, count.index + 1)}"
 
-  count = 27
+  count = 29
 }
