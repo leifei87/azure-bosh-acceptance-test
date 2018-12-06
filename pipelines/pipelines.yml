@@ -163,6 +163,10 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: multiple-nics
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: network-security-groups
 
   - &teardown
     task: teardown

@@ -42,6 +42,10 @@ output "default_security_group" {
   value = "${azurerm_network_security_group.bosh_deployed_vms_security_group.name}"
 }
 
+output "test_security_group" {
+  value = "${azurerm_network_security_group.test_security_group.name}"
+}
+
 output "storage_account_name" {
   value = "${azurerm_storage_account.default_storage_account.name}"
 }
