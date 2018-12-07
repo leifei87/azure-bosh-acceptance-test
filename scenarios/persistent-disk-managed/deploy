@@ -3,25 +3,75 @@
 scenario=$1
 scenario_path=$2
 
-echo "Case: size 1GB, type StandardLRS"
+echo "Case: size 1GB, type StandardLRS, caching None"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v vm_type=D1v2 \
   -v disk_type=1GBStandardLRS
 
-echo "Case: size 1GB, type StandardSSDLRS"
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+disk_name=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").name')
+
+disk_size=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.diskSizeGb')
+disk_type=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.sku.name')
+disk_caching=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.tags.caching')
+
+if [ ${disk_size} == 1 ] && [ "${disk_caching}" == "None" ] && [ "${disk_type}" == "Standard_LRS" ]
+then
+  echo "The disk size, caching and type are expected."
+else
+  echo "The disk size, caching and type are not expected."
+  exit 1
+fi
+
+echo "Case: size 10GB, type StandardSSDLRS, caching ReadOnly"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v vm_type=D1v2 \
-  -v disk_type=1GBStandardSSDLRS
+  -v disk_type=10GBStandardSSDLRS
 
-echo "Case: size 1GB, type PremiumLRS"
+vm_name=$(get_vm_name ${scenario})
+
+disk_name=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").name')
+
+disk_size=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.diskSizeGb')
+disk_type=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.sku.name')
+disk_caching=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.tags.caching')
+
+if [ ${disk_size} == 10 ] && [ "${disk_caching}" == "ReadOnly" ] && [ "${disk_type}" == "StandardSSD_LRS" ]
+then
+  echo "The disk size, caching and type are expected."
+else
+  echo "The disk size, caching and type are not expected."
+  exit 1
+fi
+
+
+echo "Case: size 1GB, type PremiumLRS, caching ReadWrite"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v vm_type=DS1v2 \
   -v disk_type=1GBPremiumLRS
 
+vm_name=$(get_vm_name ${scenario})
+
+disk_name=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").name')
+
+disk_size=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.diskSizeGb')
+disk_type=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.sku.name')
+disk_caching=$(az disk show --name ${disk_name} --resource-group ${rg_name} | jq -r '.tags.caching')
+
 bosh -n -d $scenario delete-deployment
+
+if [ ${disk_size} == 1 ] && [ "${disk_caching}" == "ReadWrite" ] && [ "${disk_type}" == "Premium_LRS" ]
+then
+  echo "The disk size, caching and type are expected."
+else
+  echo "The disk size, caching and type are not expected."
+  exit 1
+fi
