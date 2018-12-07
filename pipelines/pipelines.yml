@@ -158,10 +158,6 @@ shared:
       - <<: *run-e2e
         params:
           <<: *azure-environment-params
-          SCENARIO: separate-public-ip
-      - <<: *run-e2e
-        params:
-          <<: *azure-environment-params
           SCENARIO: multiple-nics
       - <<: *run-e2e
         params:
@@ -232,6 +228,10 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: resource-groups
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: separate-public-ip
           - <<: *run-e2e-common-cases
         ensure:
           do:
@@ -283,6 +283,10 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: availability-zone
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: separate-public-ip
           - <<: *run-e2e-common-cases
         ensure:
           do:
@@ -324,6 +328,10 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: availability-zone
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: separate-public-ip
           - <<: *run-e2e-common-cases
         ensure:
           do:
