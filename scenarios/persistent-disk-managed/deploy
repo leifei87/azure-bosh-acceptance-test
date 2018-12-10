@@ -1,5 +1,6 @@
 #!/bin/bash -xeu
 
+source e2e/functions/utils.sh
 scenario=$1
 scenario_path=$2
 
