@@ -1,16 +1,47 @@
 #!/bin/bash -xeu
 
+source e2e/functions/utils.sh
 scenario=$1
 scenario_path=$2
+
+default_user_assigned_identity_name=$(cat environment/metadata | jq -r '.default_user_assigned_identity_name')
+user_assigned_identity_name=$(cat environment/metadata | jq -r '.user_assigned_identity_name')
 
 echo "Deploying an instance with default managed identity"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario
 
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+identity_type=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.type')
+identity_id=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.identityIds[0]')
+
+if [[ "${identity_id}" == *"${default_user_assigned_identity_name}" ]] && [[ "${identity_type}" == "UserAssigned" ]]
+then
+  echo "The managed identity is configured as expected"
+else
+  echo "The managed identity is NOT configured as expected"
+  exit 1
+fi
+
 echo "Deploying an instance with system assigned managed identity in vm_extensions"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario \
   -o ${scenario_path}/use-system-assigned-managed-identity.yml
+
+vm_name=$(get_vm_name ${scenario})
+
+identity_type=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.type')
+identity_id=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.identityIds[0]')
+
+if [[ "${identity_id}" == "null" ]] && [[ "${identity_type}" == "SystemAssigned" ]]
+then
+  echo "The managed identity is configured as expected"
+else
+  echo "The managed identity is NOT configured as expected"
+  exit 1
+fi
 
 echo "Deploying an instance with user assigned managed identity in vm_extensions"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
@@ -18,3 +49,16 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/use-user-assigned-managed-identity.yml
 
 bosh -n -d $scenario delete-deployment
+
+vm_name=$(get_vm_name ${scenario})
+
+identity_type=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.type')
+identity_id=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.identityIds[0]')
+
+if [[ "${identity_id}" == *"${user_assigned_identity_name}" ]] && [[ "${identity_type}" == "UserAssigned" ]]
+then
+  echo "The managed identity is configured as expected"
+else
+  echo "The managed identity is NOT configured as expected"
+  exit 1
+fi
