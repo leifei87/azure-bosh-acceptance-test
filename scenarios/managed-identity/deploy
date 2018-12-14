@@ -14,6 +14,7 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario \
   -o ${scenario_path}/use-system-assigned-managed-identity.yml
 
+rg_name=$(get_rg_name ${scenario})
 vm_name=$(get_vm_name ${scenario})
 
 identity_type=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.identity.type')
