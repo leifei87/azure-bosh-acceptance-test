@@ -3,10 +3,68 @@
 scenario=$1
 scenario_path=$2
 
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -v scenario=$scenario
+
 # Update a VM with the vm_strategy: create-swap-delete
+bosh upload-stemcell --sha1=6e1a2bb5cda14f272c5290e6d32587b4152f4c47 https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-xenial-go_agent?v=170.9
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
-  -v vm_type=D2v2
+  -v stemcell_version=170.9
+
+echo '1. Verify deployment'
+task_id=$(bosh -d ${scenario} tasks -r --json | jq -r '.Tables[0].Rows[0].id')
+if bosh task ${task_id} --debug | grep -q 'delete_vm'
+then
+  echo 'the deployment should not delete instance when vm_strategy is create-swap-delete'
+  exit 1
+fi
+
+echo '2. Verify whether orphaned vm exists'
+count=$(bosh -d ${scenario} orphaned-vms --json | jq -r '.Tables[0].Rows | length')
+
+if [[ ${count} == 0 ]]
+then
+  echo 'orphaned vm does not exist'
+  exit 1
+fi
+
+echo '3. Verify whether a task would be triggered by scheduler within 5 mins for cleaning up orphaned vm'
+duration=0
+interval=10
+while
+  cleanup_task=$(bosh tasks -r -a --json | jq -r '.Tables[0].Rows[] | select(.description  == "scheduled ScheduledOrphanedVMCleanup")')
+  [[ ${cleanup_task} == '' ]]
+do
+  if [[ ${duration} -gt 300 ]]
+  then
+    echo 'Clean-up task has not been triggered within 5 mins'
+    exit 1
+  fi
+  echo 'wait for the cleanup task to be triggered...'
+  sleep ${interval}
+  (( duration += ${interval} ))
+done
+echo 'The cleanup task has been triggered'
+
+while
+  task_state=$(bosh tasks -r -a --json | jq -r '.Tables[0].Rows[] | select(.description  == "scheduled ScheduledOrphanedVMCleanup").state')
+  [[ "${task_state}" == "processing" ]]
+do
+  echo 'wait for the clean-up task to complete'
+  sleep ${interval}
+done
+
+echo '4. Verify whether orphaned vm has been deleted'
+
+count=$(bosh -d ${scenario} orphaned-vms --json | jq -r '.Tables[0].Rows | length')
+if [[ ${count} == 0 ]]
+then
+  echo 'Orphaned vm has been deleted as expected'
+else
+  echo 'Orphaned vm has NOT been deleted'
+  exit 1
+fi
 
 bosh -n -d $scenario delete-deployment
