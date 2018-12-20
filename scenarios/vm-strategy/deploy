@@ -6,6 +6,8 @@ scenario_path=$2
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario
 
+vm_name=$(get_vm_name ${scenario})
+
 # Update a VM with the vm_strategy: create-swap-delete
 bosh upload-stemcell --sha1=6e1a2bb5cda14f272c5290e6d32587b4152f4c47 https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-xenial-go_agent?v=170.9
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
@@ -15,7 +17,7 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
 
 echo '1. Verify deployment'
 task_id=$(bosh -d ${scenario} tasks -r --json | jq -r '.Tables[0].Rows[0].id')
-if bosh task ${task_id} --debug | grep -q 'delete_vm'
+if bosh task ${task_id} --debug | grep -q "delete_vm.*${vm_name}"
 then
   echo 'the deployment should not delete instance when vm_strategy is create-swap-delete'
   exit 1
