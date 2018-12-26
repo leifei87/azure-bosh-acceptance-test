@@ -53,7 +53,7 @@ echo 'The cleanup task has been triggered'
 
 while
   task_state=$(bosh tasks -r -a --json | jq -r '.Tables[0].Rows[] | select(.description  == "scheduled ScheduledOrphanedVMCleanup").state')
-  [[ "${task_state}" == "processing" ]]
+  [[ "${task_state}" != "done" ]] && [[ "${task_state}" != "error" ]]
 do
   echo 'wait for the clean-up task to complete'
   sleep ${interval}
