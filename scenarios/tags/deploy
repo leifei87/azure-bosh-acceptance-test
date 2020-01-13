@@ -1,0 +1,24 @@
+#!/bin/bash -xeu
+
+source e2e/functions/utils.sh
+scenario=$1
+scenario_path=$2
+
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -o ${scenario_path}/ops.yml \
+  -v scenario=$scenario
+
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+has_key=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.tags.test_name == "test_value"')
+
+bosh -n -d $scenario delete-deployment
+
+if [ "${has_key}" == "true" ]
+then
+  echo "The tag is configurated as expected"
+else
+  echo "The tag is not configurated"
+  exit 1
+fi

@@ -20,3 +20,4 @@
     name: multiple-storage-accounts
     cloud_properties:
       storage_account_name: "*boshvms*"
+      storage_account_max_disk_number: 5

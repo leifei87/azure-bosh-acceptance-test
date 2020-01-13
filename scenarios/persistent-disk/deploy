@@ -1,30 +1,100 @@
 #!/bin/bash -xeu
 
+source e2e/functions/utils.sh
 scenario=$1
 scenario_path=$2
 
+##########################################
+####   Case: size 1GB, caching None   ####
+##########################################
 echo "Case: size 1GB, caching None"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v disk_type=1GB
 
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").diskSizeGb')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").caching')
+
+if [ ${disk_size} == 1 ] && [ "${disk_caching}" == "None" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi
+
+##########################################
+###  Case: size 1GB, caching ReadOnly  ###
+##########################################
 echo "Case: size 1GB, caching ReadOnly"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v disk_type=1GBReadOnly
 
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").diskSizeGb')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").caching')
+
+if [ ${disk_size} == 1 ] && [ "${disk_caching}" == "ReadOnly" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi
+
+
+##########################################
+### Case: size 1GB, caching ReadWrite  ###
+##########################################
 echo "Case: size 1GB, caching ReadWrite"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v disk_type=1GBReadWrite
 
-echo "Case: size 4GB, caching None"
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").diskSizeGb')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").caching')
+
+if [ ${disk_size} == 1 ] && [ "${disk_caching}" == "ReadWrite" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi
+
+##########################################
+####   Case: size 4TB, caching None   ####
+##########################################
+echo "Case: size 4TB, caching None"
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -o ${scenario_path}/ops.yml \
   -v scenario=$scenario \
   -v disk_type=4TB
 
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+disk_size=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").diskSizeGb')
+disk_caching=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.createOption == "Attach").caching')
+
 bosh -n -d $scenario delete-deployment
+
+if [ ${disk_size} == 4095 ] && [ "${disk_caching}" == "None" ]
+then
+  echo "The disk size and caching is expected."
+else
+  echo "The disk size and caching is not expected."
+  exit 1
+fi

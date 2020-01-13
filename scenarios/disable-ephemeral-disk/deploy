@@ -1,0 +1,23 @@
+#!/bin/bash -xeu
+
+source e2e/functions/utils.sh
+scenario=$1
+scenario_path=$2
+
+bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
+  -o ${scenario_path}/ops.yml \
+  -v scenario=$scenario
+
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+
+ephemeral_disk=$(az vm show --name ${vm_name} --resource-group ${rg_name} | jq -r '.storageProfile.dataDisks[] | select(.name | contains("ephemeral-disk"))')
+
+bosh -n -d $scenario delete-deployment
+
+if [ "${ephemeral_disk}" == "" ]
+then
+  echo "The ephemeral disk is disabled"
+else
+  exit 1
+fi

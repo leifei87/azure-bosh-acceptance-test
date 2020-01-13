@@ -1,5 +1,6 @@
 #!/bin/bash -xeu
 
+source e2e/functions/utils.sh
 scenario=$1
 scenario_path=$2
 
@@ -9,4 +10,17 @@ bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario \
   -v sku=$sku
 
+
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+backend_ipconf_id=$(az network lb list --resource-group ${rg_name} | jq -r '.[] | select(.name | contains("standard-lb")).backendAddressPools[0].backendIpConfigurations[0].id')
+
 bosh -n -d $scenario delete-deployment
+
+if [[ "${backend_ipconf_id}" =~ "${vm_name}" ]]
+then
+  echo "The standard load balancer is assigned to the specific nic successfully"
+else
+  echo "The standard load balancer is not assigned to the specific nic"
+  exit 1
+fi

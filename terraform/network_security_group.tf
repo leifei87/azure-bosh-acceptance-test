@@ -111,3 +111,9 @@ resource "azurerm_network_security_group" "bosh_deployed_vms_security_group" {
     destination_address_prefix = "*"
   }
 }
+
+resource "azurerm_network_security_group" "test_security_group" {
+  name                = "${var.env_name}-test-nsg"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.bosh_resource_group.name}"
+}

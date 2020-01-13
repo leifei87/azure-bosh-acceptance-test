@@ -126,6 +126,10 @@ shared:
       - <<: *run-e2e
         params:
           <<: *azure-environment-params
+          SCENARIO: application-gateways
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
           SCENARIO: ip-forwarding
       - <<: *run-e2e
         params:
@@ -135,6 +139,30 @@ shared:
         params:
           <<: *azure-environment-params
           SCENARIO: dynamic-public-ip
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: ephemeral-disk
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: disable-ephemeral-disk
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: root-disk
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: tags
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: multiple-nics
+      - <<: *run-e2e
+        params:
+          <<: *azure-environment-params
+          SCENARIO: network-security-groups
 
   - &teardown
     task: teardown
@@ -196,6 +224,14 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: regional-load-balancer
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: resource-groups
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: separate-public-ip
           - <<: *run-e2e-common-cases
         ensure:
           do:
@@ -239,6 +275,18 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: regional-load-balancer
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: resource-groups
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: availability-zone
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: separate-public-ip
           - <<: *run-e2e-common-cases
         ensure:
           do:
@@ -276,6 +324,14 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: zonal-load-balancer
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: availability-zone
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: separate-public-ip
           - <<: *run-e2e-common-cases
         ensure:
           do:
@@ -311,6 +367,10 @@ jobs:
             params:
               <<: *azure-environment-params
               SCENARIO: regional-load-balancer
+          - <<: *run-e2e
+            params:
+              <<: *azure-environment-params
+              SCENARIO: availability-zone
           - <<: *run-e2e-common-cases
         ensure:
           do:

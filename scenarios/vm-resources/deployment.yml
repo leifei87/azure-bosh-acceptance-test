@@ -68,8 +68,8 @@ instance_groups:
   azs: [ z1 ]
   vm_resources:
     cpu: 2
-    ram: 2048
-    ephemeral_disk_size: 204800
+    ram: 4096
+    ephemeral_disk_size: 102400
   persistent_disk_type: default
   stemcell: default
   networks:

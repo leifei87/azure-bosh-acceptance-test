@@ -1,9 +1,24 @@
 #!/bin/bash -xeu
 
+source e2e/functions/utils.sh
 scenario=$1
 scenario_path=$2
 
 bosh -n -d $scenario deploy e2e/manifests/deployment.yml \
   -v scenario=$scenario
 
+rg_name=$(get_rg_name ${scenario})
+vm_name=$(get_vm_name ${scenario})
+nic_name="${vm_name}-0"
+
+ip_allocation_method=$(az network nic show --name ${nic_name} --resource-group ${rg_name} | jq -r '.ipConfigurations[0].privateIpAllocationMethod')
+
 bosh -n -d $scenario delete-deployment
+
+if [ "${ip_allocation_method}" == "Dynamic" ]
+then
+  echo "The private ip allocation method is Dynamic"
+else
+  echo "The private ip allocation method is NOT Dynamic"
+  exit 1
+fi

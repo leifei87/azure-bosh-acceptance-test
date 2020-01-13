@@ -1,0 +1,8 @@
+---
+- type: replace
+  path: /instance_groups/name=nginx/networks/name=separate-public-ip?/default
+  value: [gateway, dns]
+- type: replace
+  path: /instance_groups/name=nginx/networks/name=vip?/static_ips
+  value: [((separate_public_ip))]
+

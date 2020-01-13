@@ -3,5 +3,5 @@
   path: /update/vm_strategy?
   value: create-swap-delete
 - type: replace
-  path: /instance_groups/name=nginx/vm_type
-  value: ((vm_type))
+  path: /stemcells/alias=default/version
+  value: ((stemcell_version))

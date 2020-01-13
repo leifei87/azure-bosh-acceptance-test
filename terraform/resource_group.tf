@@ -6,3 +6,8 @@ resource "azurerm_resource_group" "bosh_resource_group" {
     autostop = "no"
   }
 }
+# Create a resource group for separate public IP
+resource "azurerm_resource_group" "public_ip_resource_group" {
+  name     = "${azurerm_resource_group.bosh_resource_group.name}-public-ip"
+  location = "${var.location}"
+}
